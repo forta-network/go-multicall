@@ -7,7 +7,7 @@ A thin Go client for making multiple function calls in single `eth_call` request
 - Uses the go-ethereum tools and libraries
 - Interfaces with the [MakerDAO `Multicall3` contract](https://github.com/mds1/multicall)
 
-_**Warning:** MakerDAO Multicall contracts are different than the [OpenZeppelin Multicall contract](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Multicall.sol). Please see [this thread](https://forum.openzeppelin.com/t/multicall-by-oz-and-makerdao-has-a-difference/9350) in the forta-network forum if you are looking for an explanation._
+_**Warning:** MakerDAO Multicall contracts are different than the [OpenZeppelin Multicall contract](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Multicall.sol). Please see [this thread](https://forum.openzeppelin.com/t/multicall-by-oz-and-makerdao-has-a-difference/9350) in the OpenZeppelin forum if you are looking for an explanation._
 
 ## Install
 
