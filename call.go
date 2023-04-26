@@ -101,9 +101,6 @@ func (call *Call) Unpack(b []byte) error {
 
 // Pack converts and packs EVM inputs.
 func (call *Call) Pack() ([]byte, error) {
-	if len(call.Inputs) == 0 {
-		return make([]byte, 0), nil
-	}
 	b, err := call.Contract.ABI.Pack(call.Method, call.Inputs...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to pack '%s' inputs: %v", call.Method, err)
