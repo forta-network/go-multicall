@@ -78,21 +78,41 @@ func (caller *Caller) Call(opts *bind.CallOpts, calls ...*Call) ([]*Call, error)
 
 // CallChunked makes multiple multicalls by chunking given calls.
 func (caller *Caller) CallChunked(opts *bind.CallOpts, chunkSize int, calls ...*Call) ([]*Call, error) {
-	if chunkSize <= 0 || len(calls) < 2 {
-		return caller.Call(opts, calls...)
-	}
-	callCount := len(calls) / chunkSize
-
 	var allCalls []*Call
-	for i := 0; i < callCount; i++ {
-		start := i * chunkSize
-		end := start + chunkSize
-		chunk, err := caller.Call(opts, calls[start:end]...)
+	for i, chunk := range chunkInputs(chunkSize, calls) {
+		chunk, err := caller.Call(opts, chunk...)
 		if err != nil {
 			return calls, fmt.Errorf("call chunk [%d] failed: %v", i, err)
 		}
 		allCalls = append(allCalls, chunk...)
 	}
-
 	return allCalls, nil
+}
+
+func chunkInputs[T any](chunkSize int, inputs []T) (chunks [][]T) {
+	if len(inputs) == 0 {
+		return
+	}
+
+	if chunkSize <= 0 || len(inputs) < 2 || chunkSize > len(inputs) {
+		return [][]T{inputs}
+	}
+
+	lastChunkSize := len(inputs) % chunkSize
+
+	chunkCount := len(inputs) / chunkSize
+
+	for i := 0; i < chunkCount; i++ {
+		start := i * chunkSize
+		end := start + chunkSize
+		chunks = append(chunks, inputs[start:end])
+	}
+
+	if lastChunkSize > 0 {
+		start := chunkCount * chunkSize
+		end := start + lastChunkSize
+		chunks = append(chunks, inputs[start:end])
+	}
+
+	return
 }

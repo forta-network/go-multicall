@@ -325,3 +325,57 @@ func TestDial(t *testing.T) {
 	r.NoError(err)
 	r.NotNil(caller)
 }
+
+func TestChunkInputs(t *testing.T) {
+	testCases := []struct {
+		name      string
+		chunkSize int
+		inputs    []int
+		expected  [][]int
+	}{
+		{
+			name:      "zero inputs large chunk size",
+			chunkSize: 12345,
+			inputs:    []int{},
+			expected:  nil,
+		},
+		{
+			name:      "single input large chunk size",
+			chunkSize: 12345,
+			inputs:    []int{10},
+			expected:  [][]int{{10}},
+		},
+		{
+			name:      "2 inputs chunk size 1",
+			chunkSize: 1,
+			inputs:    []int{10, 20},
+			expected:  [][]int{{10}, {20}},
+		},
+		{
+			name:      "2 inputs chunk size 2",
+			chunkSize: 2,
+			inputs:    []int{10, 20},
+			expected:  [][]int{{10, 20}},
+		},
+		{
+			name:      "5 inputs chunk size 3",
+			chunkSize: 3,
+			inputs:    []int{10, 20, 30, 40, 50},
+			expected:  [][]int{{10, 20, 30}, {40, 50}},
+		},
+		{
+			name:      "3 inputs chunk size 5",
+			chunkSize: 5,
+			inputs:    []int{10, 20, 30},
+			expected:  [][]int{{10, 20, 30}},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			r := require.New(t)
+
+			r.Equal(testCase.expected, chunkInputs(testCase.chunkSize, testCase.inputs))
+		})
+	}
+}
