@@ -75,3 +75,24 @@ func (caller *Caller) Call(opts *bind.CallOpts, calls ...*Call) ([]*Call, error)
 
 	return calls, nil
 }
+
+// CallChunked makes multiple multicalls by chunking given calls.
+func (caller *Caller) CallChunked(opts *bind.CallOpts, chunkSize int, calls ...*Call) ([]*Call, error) {
+	if chunkSize <= 0 || len(calls) < 2 {
+		return caller.Call(opts, calls...)
+	}
+	callCount := len(calls) / chunkSize
+
+	var allCalls []*Call
+	for i := 0; i < callCount; i++ {
+		start := i * chunkSize
+		end := start + chunkSize
+		chunk, err := caller.Call(opts, calls[start:end]...)
+		if err != nil {
+			return calls, fmt.Errorf("call chunk [%d] failed: %v", i, err)
+		}
+		allCalls = append(allCalls, chunk...)
+	}
+
+	return allCalls, nil
+}

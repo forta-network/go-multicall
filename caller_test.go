@@ -147,13 +147,12 @@ func TestCaller_TwoCalls(t *testing.T) {
 				return [][]byte{
 					// return inputs as outputs by stripping the method prefix
 					calls[0].CallData[4:],
-					calls[1].CallData[4:],
 				}
 			},
 		},
 	}
 
-	calls, err := caller.Call(nil, call1, call2)
+	calls, err := caller.CallChunked(nil, 1, call1, call2)
 	r.NoError(err)
 
 	call1Out := calls[0].Outputs.(*testType)
@@ -207,7 +206,7 @@ func TestCaller_EmptyCall(t *testing.T) {
 		},
 	}
 
-	calls, err := caller.Call(nil, call)
+	calls, err := caller.CallChunked(nil, 1, call)
 	r.NoError(err)
 	r.Len(calls, 1)
 }
