@@ -1,5 +1,5 @@
 # go-multicall
-![coverage](https://img.shields.io/badge/coverage-86.0%25-brightgreen)
+![coverage](https://img.shields.io/badge/coverage-87.0%25-brightgreen)
 ![build](https://github.com/forta-network/go-multicall/actions/workflows/build.yml/badge.svg)
 
 A thin Go client for making multiple function calls in single `eth_call` request
