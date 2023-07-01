@@ -3,6 +3,7 @@ package multicall
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -77,9 +78,14 @@ func (caller *Caller) Call(opts *bind.CallOpts, calls ...*Call) ([]*Call, error)
 }
 
 // CallChunked makes multiple multicalls by chunking given calls.
-func (caller *Caller) CallChunked(opts *bind.CallOpts, chunkSize int, calls ...*Call) ([]*Call, error) {
+// Cooldown is helpful for sleeping between chunks and avoiding rate limits.
+func (caller *Caller) CallChunked(opts *bind.CallOpts, chunkSize int, cooldown time.Duration, calls ...*Call) ([]*Call, error) {
 	var allCalls []*Call
 	for i, chunk := range chunkInputs(chunkSize, calls) {
+		if i > 0 && cooldown > 0 {
+			time.Sleep(cooldown)
+		}
+
 		chunk, err := caller.Call(opts, chunk...)
 		if err != nil {
 			return calls, fmt.Errorf("call chunk [%d] failed: %v", i, err)

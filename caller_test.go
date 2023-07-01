@@ -152,7 +152,7 @@ func TestCaller_TwoCalls(t *testing.T) {
 		},
 	}
 
-	calls, err := caller.CallChunked(nil, 1, call1, call2)
+	calls, err := caller.CallChunked(nil, 1, 0, call1, call2)
 	r.NoError(err)
 
 	call1Out := calls[0].Outputs.(*testType)
@@ -206,7 +206,7 @@ func TestCaller_EmptyCall(t *testing.T) {
 		},
 	}
 
-	calls, err := caller.CallChunked(nil, 1, call)
+	calls, err := caller.CallChunked(nil, 1, 0, call)
 	r.NoError(err)
 	r.Len(calls, 1)
 }
