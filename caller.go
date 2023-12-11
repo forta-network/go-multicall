@@ -3,6 +3,7 @@ package multicall
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -82,7 +83,11 @@ func (caller *Caller) calls(opts *bind.CallOpts, calls ...*Call) ([]*Call, error
 	for i, result := range results {
 		call := calls[i] // index always matches
 		call.Failed = !result.Success
-		if err := call.Unpack(result.ReturnData); err != nil && !call.CanFail {
+		if err := call.Unpack(result.ReturnData); err != nil {
+			if call.CanFail {
+				log.Println(fmt.Errorf("failed to unpack call outputs at index [%d]: %v", i, err))
+				continue
+			}
 			return calls, fmt.Errorf("failed to unpack call outputs at index [%d]: %v", i, err)
 		}
 	}
