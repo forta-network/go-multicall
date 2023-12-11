@@ -42,6 +42,7 @@ type Call struct {
 	CallName string
 	Contract *Contract
 	Method   string
+	Extend   any
 	Inputs   []any
 	Outputs  any
 	CanFail  bool
@@ -65,6 +66,15 @@ func (contract *Contract) NewCall(
 func (call *Call) Name(name string) *Call {
 	call.CallName = name
 	return call
+}
+
+func (call *Call) SetExtend(ext any) *Call {
+	call.Extend = ext
+	return call
+}
+
+func (call *Call) UnpackResult() []interface{} {
+	return call.Outputs.([]interface{})
 }
 
 // AllowFailure sets if the call is allowed to fail. This helps avoiding a revert
