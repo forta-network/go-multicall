@@ -2,6 +2,7 @@ package multicall
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"reflect"
 
@@ -75,18 +76,22 @@ func (call *Call) AllowFailure() *Call {
 
 // Unpack unpacks and converts EVM outputs and sets struct fields.
 func (call *Call) Unpack(b []byte) error {
-	t := reflect.ValueOf(call.Outputs)
-	if t.Kind() == reflect.Pointer {
-		t = t.Elem()
-	}
 	out, err := call.Contract.ABI.Unpack(call.Method, b)
 	if err != nil {
 		return fmt.Errorf("failed to unpack '%s' outputs: %v", call.Method, err)
 	}
-
-	if t.Kind() != reflect.Struct {
+	if call.Outputs == nil {
 		call.Outputs = out
 		return nil
+	}
+
+	t := reflect.ValueOf(call.Outputs)
+	if t.Kind() == reflect.Pointer {
+		t = t.Elem()
+	}
+
+	if t.Kind() != reflect.Struct {
+		return errors.New("outputs type is not a struct")
 	}
 
 	fieldCount := t.NumField()
