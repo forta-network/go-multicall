@@ -19,6 +19,7 @@ go get github.com/forta-network/go-multicall
 
 (See other examples under the `examples` directory!)
 
+#### Multicall   
 ```go
 package main
 
@@ -89,5 +90,69 @@ func main() {
 	for _, call := range calls {
 		fmt.Println(call.CallName, ":", call.Outputs.(*balanceOutput).Balance)
 	}
+}
+```
+
+#### SingleCall   
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/forta-network/go-multicall"
+)
+
+const (
+	APIURL   = "https://cloudflare-eth.com"
+	ERC20ABI = `[
+		{
+			"constant":true,
+			"inputs":[
+					{
+						"name":"tokenOwner",
+						"type":"address"
+					}
+			],
+			"name":"balanceOf",
+			"outputs":[
+					{
+						"name":"balance",
+						"type":"uint256"
+					}
+			],
+			"payable":false,
+			"stateMutability":"view",
+			"type":"function"
+		}
+	]`
+)
+
+func main() {
+	caller, err := multicall.Dial(context.Background(), APIURL)
+	if err != nil {
+		panic(err)
+	}
+
+	contract, err := multicall.NewContract(ERC20ABI, "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48")
+	if err != nil {
+		panic(err)
+	}
+
+	single, err := caller.CallSingle(nil,
+		contract.NewCall(
+			nil,
+			"balanceOf",
+			common.HexToAddress("0xcEe284F754E854890e311e3280b767F80797180d"), // Arbitrum One gateway
+		).Name("Arbitrum One gateway balance").SetExtend(map[string]string{
+			"account": "0xcEe284F754E854890e311e3280b767F80797180d",
+			"token":   "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+		}))
+	if err != nil {
+		return
+	}
+
+	fmt.Println(single.CallName, ":", single.UnpackResult()[0].(*big.Int), single.Extend)
 }
 ```

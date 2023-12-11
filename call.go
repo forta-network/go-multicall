@@ -42,6 +42,7 @@ type Call struct {
 	CallName string
 	Contract *Contract
 	Method   string
+	Extend   any
 	Inputs   []any
 	Outputs  any
 	CanFail  bool
@@ -67,6 +68,18 @@ func (call *Call) Name(name string) *Call {
 	return call
 }
 
+func (call *Call) SetExtend(ext any) *Call {
+	call.Extend = ext
+	return call
+}
+
+func (call *Call) UnpackResult() []interface{} {
+	if call.Outputs == nil {
+		return nil
+	}
+	return call.Outputs.([]interface{})
+}
+
 // AllowFailure sets if the call is allowed to fail. This helps avoiding a revert
 // when one of the calls in the array fails.
 func (call *Call) AllowFailure() *Call {
@@ -76,17 +89,22 @@ func (call *Call) AllowFailure() *Call {
 
 // Unpack unpacks and converts EVM outputs and sets struct fields.
 func (call *Call) Unpack(b []byte) error {
+	out, err := call.Contract.ABI.Unpack(call.Method, b)
+	if err != nil {
+		return fmt.Errorf("failed to unpack '%s' outputs: %v", call.Method, err)
+	}
+	if call.Outputs == nil {
+		call.Outputs = out
+		return nil
+	}
+
 	t := reflect.ValueOf(call.Outputs)
 	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
+
 	if t.Kind() != reflect.Struct {
 		return errors.New("outputs type is not a struct")
-	}
-
-	out, err := call.Contract.ABI.Unpack(call.Method, b)
-	if err != nil {
-		return fmt.Errorf("failed to unpack '%s' outputs: %v", call.Method, err)
 	}
 
 	fieldCount := t.NumField()
