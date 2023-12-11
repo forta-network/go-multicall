@@ -145,11 +145,14 @@ func main() {
 			nil,
 			"balanceOf",
 			common.HexToAddress("0xcEe284F754E854890e311e3280b767F80797180d"), // Arbitrum One gateway
-		).Name("Arbitrum One gateway balance"))
+		).Name("Arbitrum One gateway balance").SetExtend(map[string]string{
+			"account": "0xcEe284F754E854890e311e3280b767F80797180d",
+			"token":   "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+		}))
 	if err != nil {
 		return
 	}
 
-	fmt.Println(single.CallName, ":", single.Outputs, err)
+	fmt.Println(single.CallName, ":", single.UnpackResult()[0].(*big.Int), single.Extend)
 }
 ```
