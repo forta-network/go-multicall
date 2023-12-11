@@ -74,6 +74,9 @@ func (call *Call) SetExtend(ext any) *Call {
 }
 
 func (call *Call) UnpackResult() []interface{} {
+	if call.Outputs == nil {
+		return nil
+	}
 	return call.Outputs.([]interface{})
 }
 
