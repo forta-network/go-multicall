@@ -47,6 +47,19 @@ func Dial(ctx context.Context, rawUrl string, multicallAddr ...string) (*Caller,
 
 // Call makes multicalls.
 func (caller *Caller) Call(opts *bind.CallOpts, calls ...*Call) ([]*Call, error) {
+	return caller.calls(opts, calls...)
+}
+
+func (caller *Caller) CallSingle(opts *bind.CallOpts, call *Call) (*Call, error) {
+
+	calls, err := caller.calls(opts, call)
+	if err != nil {
+		return call, fmt.Errorf("CallSingle failed: %v", err)
+	}
+	return calls[0], nil
+}
+
+func (caller *Caller) calls(opts *bind.CallOpts, calls ...*Call) ([]*Call, error) {
 	var multiCalls []contract_multicall.Multicall3Call3
 
 	for i, call := range calls {
@@ -86,7 +99,7 @@ func (caller *Caller) CallChunked(opts *bind.CallOpts, chunkSize int, cooldown t
 			time.Sleep(cooldown)
 		}
 
-		chunk, err := caller.Call(opts, chunk...)
+		chunk, err := caller.calls(opts, chunk...)
 		if err != nil {
 			return calls, fmt.Errorf("call chunk [%d] failed: %v", i, err)
 		}

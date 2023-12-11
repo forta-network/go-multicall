@@ -2,7 +2,6 @@ package multicall
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"reflect"
 
@@ -80,13 +79,14 @@ func (call *Call) Unpack(b []byte) error {
 	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
-	if t.Kind() != reflect.Struct {
-		return errors.New("outputs type is not a struct")
-	}
-
 	out, err := call.Contract.ABI.Unpack(call.Method, b)
 	if err != nil {
 		return fmt.Errorf("failed to unpack '%s' outputs: %v", call.Method, err)
+	}
+
+	if t.Kind() != reflect.Struct {
+		call.Outputs = out
+		return nil
 	}
 
 	fieldCount := t.NumField()
